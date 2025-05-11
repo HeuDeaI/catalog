@@ -4,6 +4,7 @@ import (
 	"catalog/internal/handlers"
 	"catalog/internal/models"
 	"catalog/internal/repositories"
+	"catalog/internal/routes"
 	"catalog/internal/services"
 	"log"
 
@@ -12,10 +13,10 @@ import (
 	"gorm.io/gorm"
 )
 
-const dsn = "host=localhost user=postgres password=postgres dbname=catalog port=5432 sslmode=disable"
-
 func main() {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	const DSN = "host=localhost user=postgres password=postgres dbname=catalog port=5432 sslmode=disable"
+
+	db, err := gorm.Open(postgres.Open(DSN), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Database connection error: %v", err)
 	}
@@ -30,14 +31,7 @@ func main() {
 	productHandler := handlers.NewProductHandler(productService)
 
 	router := gin.Default()
-	api := router.Group("/products")
-	{
-		api.POST("/", productHandler.CreateProduct)
-		api.GET("/", productHandler.GetAllProducts)
-		api.GET("/:id", productHandler.GetProductByID)
-		api.PUT("/:id", productHandler.UpdateProduct)
-		api.DELETE("/:id", productHandler.DeleteProduct)
-	}
+	routes.RegisterRoutes(router, productHandler)
 
 	log.Println("Server running on port 8080")
 	if err := router.Run(":8080"); err != nil {
