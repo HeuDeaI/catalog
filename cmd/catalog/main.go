@@ -4,7 +4,6 @@ import (
 	"catalog/internal/handlers"
 	"catalog/internal/models"
 	"catalog/internal/repositories"
-	"catalog/internal/routes"
 	"catalog/internal/services"
 	"log"
 
@@ -31,7 +30,7 @@ func main() {
 	productHandler := handlers.NewProductHandler(productService)
 
 	router := gin.Default()
-	routes.RegisterRoutes(router, productHandler)
+	productHandler.RegisterRoutes(router)
 
 	log.Println("Server running on port 8080")
 	if err := router.Run(":8080"); err != nil {

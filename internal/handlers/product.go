@@ -17,6 +17,14 @@ func NewProductHandler(service services.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
+func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
+	router.POST("/products", h.CreateProduct)
+	router.GET("/products/:id", h.GetProductByID)
+	router.GET("/products", h.GetAllProducts)
+	router.PUT("/products", h.UpdateProduct)
+	router.DELETE("/products/:id", h.DeleteProduct)
+}
+
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
