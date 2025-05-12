@@ -32,6 +32,12 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
+
+	var skinTypeIDs []uint
+	if err := c.ShouldBindJSON(&skinTypeIDs); err == nil {
+		h.service.SetProductSkinTypes(&product, skinTypeIDs)
+	}
+
 	if err := h.service.CreateProduct(&product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,6 +94,12 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	var skinTypeIDs []uint
+	if err := c.ShouldBindJSON(&skinTypeIDs); err == nil {
+		h.service.SetProductSkinTypes(&product, skinTypeIDs)
+	}
+
 	if err := h.service.UpdateProduct(&product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
