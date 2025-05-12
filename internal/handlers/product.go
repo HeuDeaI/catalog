@@ -21,6 +21,7 @@ func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 	router.POST("/products", h.CreateProduct)
 	router.GET("/products/:id", h.GetProductByID)
 	router.GET("/products", h.GetAllProducts)
+	router.GET("/products/by-skin-type/:skin_type_id", h.GetProductsBySkinTypeID)
 	router.PUT("/products", h.UpdateProduct)
 	router.DELETE("/products/:id", h.DeleteProduct)
 }
@@ -62,6 +63,22 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+func (h *ProductHandler) GetProductsBySkinTypeID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("skin_type_id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid skin type ID"})
+		return
+	}
+
+	products, err := h.service.GetProductsBySkinTypeID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 

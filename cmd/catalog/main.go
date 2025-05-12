@@ -25,6 +25,9 @@ func main() {
 		log.Fatalf("Migration error: %v", err)
 	}
 
+	skinTypeRepo := repositories.NewSkinTypeRepository(db)
+	skinTypeRepo.SeedSkinTypes()
+
 	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)

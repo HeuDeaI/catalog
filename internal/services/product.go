@@ -9,6 +9,7 @@ type ProductService interface {
 	CreateProduct(product *models.Product) error
 	GetProductByID(id uint) (*models.Product, error)
 	GetAllProducts() ([]*models.Product, error)
+	GetProductsBySkinTypeID(skinTypeID uint) ([]*models.Product, error)
 	UpdateProduct(product *models.Product) error
 	DeleteProduct(id uint) error
 }
@@ -31,6 +32,10 @@ func (s *productService) GetProductByID(id uint) (*models.Product, error) {
 
 func (s *productService) GetAllProducts() ([]*models.Product, error) {
 	return s.repo.GetAll()
+}
+
+func (s *productService) GetProductsBySkinTypeID(skinTypeID uint) ([]*models.Product, error) {
+	return s.repo.GetBySkinTypeID(skinTypeID)
 }
 
 func (s *productService) UpdateProduct(product *models.Product) error {
