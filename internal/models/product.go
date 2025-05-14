@@ -8,4 +8,5 @@ type Product struct {
 	Brand       *Brand     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"brand"`
 	SkinTypeIDs []uint     `gorm:"index" json:"skin_type_ids"`
 	SkinTypes   []SkinType `gorm:"many2many:product_skin_types;" json:"skin_types"`
+	ImageURL    string     `gorm:"type:varchar(1024);" json:"image_url"`
 }

@@ -3,10 +3,13 @@ package services
 import (
 	"catalog/internal/models"
 	"catalog/internal/repositories"
+	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type ProductService interface {
-	CreateProduct(product *models.Product) error
+	CreateProduct(product *models.Product, filePath string) error
 	GetProductByID(id uint) (*models.Product, error)
 	GetAllProducts() ([]*models.Product, error)
 	UpdateProduct(product *models.Product) error
@@ -21,7 +24,13 @@ func NewProductService(repo repositories.ProductRepository) ProductService {
 	return &productService{repo: repo}
 }
 
-func (s *productService) CreateProduct(product *models.Product) error {
+func (s *productService) CreateProduct(product *models.Product, filePath string) error {
+	objectName := fmt.Sprintf("%s.png", uuid.New().String())
+	imageURL, err := s.repo.UploadImage(objectName, filePath)
+	if err != nil {
+		return err
+	}
+	product.ImageURL = imageURL
 	return s.repo.Create(product)
 }
 

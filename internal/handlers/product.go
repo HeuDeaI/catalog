@@ -32,7 +32,19 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.CreateProduct(&product); err != nil {
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image file required"})
+		return
+	}
+
+	filePath := "/tmp/" + file.Filename
+	if err := c.SaveUploadedFile(file, filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving file"})
+		return
+	}
+
+	if err := h.service.CreateProduct(&product, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
