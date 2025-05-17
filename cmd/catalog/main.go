@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("Database connection error: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.Product{}, &models.Brand{})
+	err = db.AutoMigrate(&models.Product{}, &models.Brand{}, &models.SkinType{})
 	if err != nil {
 		log.Fatalf("Migration error: %v", err)
 	}
@@ -29,7 +29,8 @@ func main() {
 	skinTypeRepo.SeedSkinTypes()
 
 	productRepo := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepo)
+	imageRepo := repositories.NewProductImageRepository()
+	productService := services.NewProductService(productRepo, imageRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
 	router := gin.Default()
