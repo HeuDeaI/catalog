@@ -27,7 +27,7 @@ func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var product models.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
+	if err := c.Bind(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
@@ -80,12 +80,22 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	var product models.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
+	if err := c.Bind(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.service.UpdateProduct(&product); err != nil {
+	file, err := c.FormFile("image")
+	var filePath string
+	if err == nil {
+		filePath = "/tmp/" + file.Filename
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving file"})
+			return
+		}
+	}
+
+	if err := h.service.UpdateProduct(&product, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

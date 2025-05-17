@@ -2,10 +2,7 @@ package repositories
 
 import (
 	"catalog/internal/models"
-	"context"
-	"fmt"
 
-	"github.com/minio/minio-go/v7"
 	"gorm.io/gorm"
 )
 
@@ -15,27 +12,14 @@ type ProductRepository interface {
 	GetAll() ([]*models.Product, error)
 	Update(product *models.Product) error
 	Delete(id uint) error
-	UploadImage(objectName, filePath string) (string, error)
 }
 
 type productRepository struct {
-	db       *gorm.DB
-	minio    *minio.Client
-	bucket   string
-	minioURL string
+	db *gorm.DB
 }
 
-func NewProductRepository(db *gorm.DB, minioClient *minio.Client, bucket string, minioURL string) ProductRepository {
-	return &productRepository{db: db, minio: minioClient, bucket: bucket, minioURL: minioURL}
-}
-
-func (r *productRepository) UploadImage(objectName, filePath string) (string, error) {
-	_, err := r.minio.FPutObject(context.Background(), r.bucket, objectName, filePath, minio.PutObjectOptions{ContentType: "image/png"})
-	if err != nil {
-		return "", err
-	}
-	imageURL := fmt.Sprintf("%s/%s/%s", r.minioURL, r.bucket, objectName)
-	return imageURL, nil
+func NewProductRepository(db *gorm.DB) ProductRepository {
+	return &productRepository{db: db}
 }
 
 func (r *productRepository) Create(product *models.Product) error {
