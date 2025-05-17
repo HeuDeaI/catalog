@@ -3,6 +3,8 @@ package services
 import (
 	"catalog/internal/models"
 	"catalog/internal/repositories"
+
+	"gorm.io/gorm"
 )
 
 type ProductService interface {
@@ -15,14 +17,29 @@ type ProductService interface {
 
 type productService struct {
 	repo repositories.ProductRepository
+	db   *gorm.DB
 }
 
-func NewProductService(repo repositories.ProductRepository) ProductService {
-	return &productService{repo: repo}
+func NewProductService(repo repositories.ProductRepository, db *gorm.DB) ProductService {
+	return &productService{repo: repo, db: db}
 }
 
 func (s *productService) CreateProduct(product *models.Product) error {
-	return s.repo.Create(product)
+	if err := s.repo.Create(product); err != nil {
+		return err
+	}
+
+	if len(product.SkinTypeIDs) > 0 {
+		var skinTypes []models.SkinType
+		if err := s.db.Where("id IN ?", product.SkinTypeIDs).Find(&skinTypes).Error; err != nil {
+			return err
+		}
+		if err := s.db.Model(product).Association("SkinTypes").Replace(skinTypes); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *productService) GetProductByID(id uint) (*models.Product, error) {
