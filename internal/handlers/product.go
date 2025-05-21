@@ -20,7 +20,7 @@ func NewProductHandler(service services.ProductService) *ProductHandler {
 func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 	router.POST("/products", h.CreateProduct)
 	router.GET("/products/:id", h.GetProductByID)
-	router.GET("/products", h.GetAllProducts)
+	router.GET("/products", h.GetProducts)
 	router.PUT("/products", h.UpdateProduct)
 	router.DELETE("/products/:id", h.DeleteProduct)
 }
@@ -71,6 +71,45 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 
 func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	products, err := h.service.GetAllProducts()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"products": products})
+}
+
+func (h *ProductHandler) GetProducts(c *gin.Context) {
+	if c.Query("min_price") != "" || c.Query("max_price") != "" {
+		h.GetProductsByFilter(c)
+		return
+	}
+	h.GetAllProducts(c)
+}
+
+func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
+	minPriceStr := c.Query("min_price")
+	maxPriceStr := c.Query("max_price")
+	var minPrice = 0.0
+	var maxPrice = 0.0
+	var err error
+
+	if minPriceStr != "" {
+		minPrice, err = strconv.ParseFloat(minPriceStr, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid min_price"})
+			return
+		}
+	}
+
+	if maxPriceStr != "" {
+		maxPrice, err = strconv.ParseFloat(maxPriceStr, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid max_price"})
+			return
+		}
+	}
+
+	products, err := h.service.GetProductsByFilter(minPrice, maxPrice)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

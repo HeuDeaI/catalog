@@ -10,6 +10,7 @@ type ProductRepository interface {
 	Create(product *models.Product) error
 	GetByID(id uint) (*models.Product, error)
 	GetAll() ([]*models.Product, error)
+	GetByFilter(minPrice, maxPrice float64) ([]*models.Product, error)
 	Update(product *models.Product) error
 	Delete(id uint) error
 }
@@ -62,4 +63,19 @@ func (r *productRepository) Update(product *models.Product) error {
 
 func (r *productRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Product{}, id).Error
+}
+
+func (r *productRepository) GetByFilter(minPrice float64, maxPrice float64) ([]*models.Product, error) {
+	var products []*models.Product
+	db := r.db.Preload("Brand").Preload("SkinTypes")
+
+	if minPrice > 0 {
+		db = db.Where("price >= ?", minPrice)
+	}
+	if maxPrice > 0 {
+		db = db.Where("price <= ?", maxPrice)
+	}
+
+	err := db.Find(&products).Error
+	return products, err
 }

@@ -14,6 +14,7 @@ type ProductService interface {
 	CreateProduct(product *models.Product, filePath string) error
 	GetProductByID(id uint) (*models.Product, error)
 	GetAllProducts() ([]*models.Product, error)
+	GetProductsByFilter(minPrice float64, maxPrice float64) ([]*models.Product, error)
 	UpdateProduct(product *models.Product, filePath string) error
 	DeleteProduct(id uint) error
 }
@@ -81,4 +82,8 @@ func (s *productService) DeleteProduct(id uint) error {
 		}
 	}
 	return s.repo.Delete(id)
+}
+
+func (s *productService) GetProductsByFilter(minPrice float64, maxPrice float64) ([]*models.Product, error) {
+	return s.repo.GetByFilter(minPrice, maxPrice)
 }
