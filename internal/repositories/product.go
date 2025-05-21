@@ -23,7 +23,21 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 }
 
 func (r *productRepository) Create(product *models.Product) error {
-	return r.db.Create(product).Error
+	if err := r.db.Create(product).Error; err != nil {
+		return err
+	}
+
+	if len(product.SkinTypeIDs) > 0 {
+		var skinTypes []models.SkinType
+		if err := r.db.Where("id IN ?", product.SkinTypeIDs).Find(&skinTypes).Error; err != nil {
+			return err
+		}
+		if err := r.db.Model(product).Association("SkinTypes").Replace(skinTypes); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *productRepository) GetByID(id uint) (*models.Product, error) {
