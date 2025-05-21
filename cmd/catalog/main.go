@@ -29,7 +29,7 @@ func main() {
 	skinTypeRepo.SeedSkinTypes()
 
 	productRepo := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepo, db)
+	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
 	router := gin.Default()
