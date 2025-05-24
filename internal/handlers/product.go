@@ -89,8 +89,7 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 	minPriceStr := c.Query("min_price")
 	maxPriceStr := c.Query("max_price")
-	var minPrice = 0.0
-	var maxPrice = 0.0
+	var minPrice, maxPrice float64
 	var err error
 
 	if minPriceStr != "" {
@@ -107,6 +106,11 @@ func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid max_price"})
 			return
 		}
+	}
+
+	if minPrice < 0 || maxPrice < 0 || minPrice > maxPrice {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price range"})
+		return
 	}
 
 	products, err := h.service.GetProductsByFilter(minPrice, maxPrice)

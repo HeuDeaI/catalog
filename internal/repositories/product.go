@@ -65,7 +65,7 @@ func (r *productRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Product{}, id).Error
 }
 
-func (r *productRepository) GetByFilter(minPrice float64, maxPrice float64) ([]*models.Product, error) {
+func (r *productRepository) GetByFilter(minPrice, maxPrice float64) ([]*models.Product, error) {
 	var products []*models.Product
 	db := r.db.Preload("Brand").Preload("SkinTypes")
 
