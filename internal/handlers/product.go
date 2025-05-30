@@ -5,6 +5,7 @@ import (
 	"catalog/internal/services"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,7 +80,7 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 }
 
 func (h *ProductHandler) GetProducts(c *gin.Context) {
-	if c.Query("min_price") != "" || c.Query("max_price") != "" {
+	if c.Query("min_price") != "" || c.Query("max_price") != "" || c.Query("skin_type") != "" {
 		h.GetProductsByFilter(c)
 		return
 	}
@@ -89,6 +90,7 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 	minPriceStr := c.Query("min_price")
 	maxPriceStr := c.Query("max_price")
+	skinTypeStr := c.Query("skin_type")
 	var minPrice, maxPrice float64
 	var err error
 
@@ -113,7 +115,20 @@ func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 		return
 	}
 
-	products, err := h.service.GetProductsByFilter(minPrice, maxPrice)
+	var skinTypeIDs []uint
+	if skinTypeStr != "" {
+		parts := strings.Split(skinTypeStr, ",")
+		for _, part := range parts {
+			id, err := strconv.ParseUint(strings.TrimSpace(part), 10, 32)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid skin_type"})
+				return
+			}
+			skinTypeIDs = append(skinTypeIDs, uint(id))
+		}
+	}
+
+	products, err := h.service.GetProductsByFilter(minPrice, maxPrice, skinTypeIDs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
