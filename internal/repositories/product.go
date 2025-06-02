@@ -55,10 +55,21 @@ func (r *productRepository) GetAll() ([]*models.Product, error) {
 
 func (r *productRepository) Update(product *models.Product) error {
 	err := r.db.Model(&product).Updates(product).Error
-	if err == nil {
-		r.db.Preload("Brand").Preload("SkinTypes").First(&product, product.ID)
+	if err != nil {
+		return err
 	}
-	return err
+
+	if len(product.SkinTypeIDs) > 0 {
+		var skinTypes []models.SkinType
+		if err := r.db.Where("id IN ?", product.SkinTypeIDs).Find(&skinTypes).Error; err != nil {
+			return err
+		}
+		if err := r.db.Model(product).Association("SkinTypes").Replace(skinTypes); err != nil {
+			return err
+		}
+	}
+
+	return r.db.Preload("Brand").Preload("SkinTypes").First(&product, product.ID).Error
 }
 
 func (r *productRepository) Delete(id uint) error {
