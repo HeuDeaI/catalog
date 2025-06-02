@@ -10,7 +10,7 @@ type ProductRepository interface {
 	Create(product *models.Product) error
 	GetByID(id uint) (*models.Product, error)
 	GetAll() ([]*models.Product, error)
-	GetByFilter(minPrice, maxPrice float64) ([]*models.Product, error)
+	GetByFilter(minPrice, maxPrice float64, skinTypeIDs []uint) ([]*models.Product, error)
 	Update(product *models.Product) error
 	Delete(id uint) error
 }
@@ -65,7 +65,7 @@ func (r *productRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Product{}, id).Error
 }
 
-func (r *productRepository) GetByFilter(minPrice, maxPrice float64) ([]*models.Product, error) {
+func (r *productRepository) GetByFilter(minPrice, maxPrice float64, skinTypeIDs []uint) ([]*models.Product, error) {
 	var products []*models.Product
 	db := r.db.Preload("Brand").Preload("SkinTypes")
 
@@ -74,6 +74,11 @@ func (r *productRepository) GetByFilter(minPrice, maxPrice float64) ([]*models.P
 	}
 	if maxPrice > 0 {
 		db = db.Where("price <= ?", maxPrice)
+	}
+
+	if len(skinTypeIDs) > 0 {
+		db = db.Joins("JOIN product_skin_types ON product_skin_types.product_id = products.id").
+			Where("product_skin_types.skin_type_id IN ?", skinTypeIDs)
 	}
 
 	err := db.Find(&products).Error
