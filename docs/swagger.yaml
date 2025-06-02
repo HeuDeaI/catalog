@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: STEKLO
+  version: 1.0.0
+servers:
+  - url: https://localhost:8080
+paths:
+  /products:
+        get:
+          summary: Return products
+          tags:
+            - Products
+          description: Returns all products or filters them by parameters (price, skin type)
+          operationId: GetProducts
+          parameters:
+            - name: min_price
+              in: query
+              description: The minimum price of the product
+              schema:
+                type: number
+            - name: max_price
+              in: query
+              description: The maximum price of the product
+              schema:
+                type: number
+            - name: skin_type
+              in: query
+              description: Skin type ID (can be passed multiple times, separated by commas)
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Successful response with a list of products
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Products'
+            'default':
+              description: Everything except successful
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Error'
+        post:
+          summary: Create a new product
+          tags:
+            - Products
+          description: Uploads information about the product and its image
+          operationId: CreateProduct
+          requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    price:
+                      type: number
+                    brand_id:
+                      type: integer
+                    skin_type_ids:
+                      type: array
+                      items:
+                        type: integer
+                    image:
+                      type: string
+                      format: binary
+          responses:
+            '201':
+               description: Product created
+               content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Product'
+            'default':
+              description: Everything except successful
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Error'
+        put:
+          summary: Update product
+          tags:
+            - Products
+          operationId: UpdateProduct
+          requestBody:
+            required: true
+            content:
+              multipart/form-data:
+                schema:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    price:
+                      type: number
+                    brand_id:
+                      type: integer
+                    skin_type_ids:
+                      type: array
+                      items:
+                        type: integer
+                    image:
+                      type: string
+                      format: binary
+          responses:
+            '200':
+               description: Product updated
+               content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Product'
+            'default':
+              description: Everything except successful
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Error'
+  /products/{id}:
+        get:
+          summary: Return product by ID
+          tags:
+            - Products
+          operationId: GetProductsByID
+          parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: Successful response with a product info
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Product'
+            'default':
+              description: Everything except successful
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Error'
+        delete:
+          summary: Delete product
+          tags:
+            - Products
+          operationId: DeleteProduct
+          parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: Product deleted
+            'default':
+              description: Everything except successful
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Error'      
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: TestProduct
+        price:
+          type: number
+          example: 99.99
+        brand:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: TestBrand
+        skin_types:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: Dry
+        image_url:
+          type: string
+          example: localhost:9000/products/example.png
+    Products:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+    Error:
+      type: object
+      properties:
+        status_code:
+          type: integer
+          example: 400
+        message: 
+          type: string
+          example: Bad request

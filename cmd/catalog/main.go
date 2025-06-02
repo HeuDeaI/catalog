@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -35,6 +37,10 @@ func main() {
 
 	router := gin.Default()
 	productHandler.RegisterRoutes(router)
+
+	router.Static("/docs", "./docs")
+	url := ginSwagger.URL("http://localhost:8080/docs/swagger.yaml")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	log.Println("Server running on port 8080")
 	if err := router.Run(":8080"); err != nil {
