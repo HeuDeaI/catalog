@@ -1,0 +1,255 @@
+basePath: /
+definitions:
+  models.Brand:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+    type: object
+  models.Product:
+    properties:
+      brand:
+        $ref: '#/definitions/models.Brand'
+      brand_id:
+        type: integer
+      id:
+        type: integer
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      skin_type_ids:
+        items:
+          type: integer
+        type: array
+      skin_types:
+        items:
+          $ref: '#/definitions/models.SkinType'
+        type: array
+    type: object
+  models.SkinType:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing products and skin types
+  title: STEKLO API
+  version: "1.0"
+paths:
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Returns all products or filters them by parameters (price, skin
+        type)
+      parameters:
+      - description: The minimum price of the product
+        in: query
+        name: min_price
+        type: number
+      - description: The maximum price of the product
+        in: query
+        name: max_price
+        type: number
+      - description: Skin type ID (comma-separated)
+        in: query
+        name: skin_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Return products
+      tags:
+      - Products
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads product info and image via multipart form
+      parameters:
+      - description: Product name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Price
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: Brand ID
+        in: formData
+        name: brand_id
+        type: integer
+      - collectionFormat: csv
+        description: Skin type IDs
+        in: formData
+        items:
+          type: integer
+        name: skin_type_ids
+        type: array
+      - description: Image file
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new product
+      tags:
+      - Products
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update product info with optional new image
+      parameters:
+      - description: Product ID
+        in: formData
+        name: id
+        required: true
+        type: integer
+      - description: Name
+        in: formData
+        name: name
+        type: string
+      - description: Price
+        in: formData
+        name: price
+        type: number
+      - description: Brand ID
+        in: formData
+        name: brand_id
+        type: integer
+      - collectionFormat: csv
+        description: Skin type IDs
+        in: formData
+        items:
+          type: integer
+        name: skin_type_ids
+        type: array
+      - description: New image file
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete product
+      tags:
+      - Products
+    get:
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Return product by ID
+      tags:
+      - Products
+swagger: "2.0"
