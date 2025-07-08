@@ -26,6 +26,20 @@ func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 	router.DELETE("/products/:id", h.DeleteProduct)
 }
 
+// CreateProduct godoc
+// @Summary     Create a new product
+// @Description Uploads product info and image via multipart form
+// @Tags        Products
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       name           formData  string   true   "Product name"
+// @Param       price          formData  number   true   "Price"
+// @Param       brand_id       formData  int      false  "Brand ID"
+// @Param       skin_type_ids  formData  []int    false  "Skin type IDs"
+// @Param       image          formData  file     true   "Image file"
+// @Success     201            {object}  models.Product
+// @Failure     400            {object}  models.Error
+// @Router      /products [post]
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.Bind(&product); err != nil {
@@ -52,6 +66,15 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, product)
 }
 
+// GetProductByID godoc
+// @Summary     Return product by ID
+// @Tags        Products
+// @Produce     json
+// @Param       id   path      int  true  "Product ID"
+// @Success     200  {object}  models.Product
+// @Failure     400  {object}  models.Error
+// @Failure     404  {object}  models.Error
+// @Router      /products/{id} [get]
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -79,6 +102,18 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 
+// GetProducts godoc
+// @Summary     Return products
+// @Description Returns all products or filters them by parameters (price, skin type)
+// @Tags        Products
+// @Accept      json
+// @Produce     json
+// @Param       min_price   query    number  false  "The minimum price of the product"
+// @Param       max_price   query    number  false  "The maximum price of the product"
+// @Param       skin_type   query    string  false  "Skin type ID (comma-separated)"
+// @Success     200         {array}  models.Product
+// @Failure     400         {object} models.Error
+// @Router      /products [get]
 func (h *ProductHandler) GetProducts(c *gin.Context) {
 	if c.Query("min_price") != "" || c.Query("max_price") != "" || c.Query("skin_type") != "" {
 		h.GetProductsByFilter(c)
@@ -136,6 +171,22 @@ func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"products": products})
 }
 
+// UpdateProduct godoc
+// @Summary     Update product
+// @Description Update product info with optional new image
+// @Tags        Products
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       id             formData  int      true   "Product ID"
+// @Param       name           formData  string   false  "Name"
+// @Param       price          formData  number   false  "Price"
+// @Param       brand_id       formData  int      false  "Brand ID"
+// @Param       skin_type_ids  formData  []int    false  "Skin type IDs"
+// @Param       image          formData  file     false  "New image file"
+// @Success     200            {object}  models.Product
+// @Failure     400            {object}  models.Error
+// @Failure     404            {object}  models.Error
+// @Router      /products [put]
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.Bind(&product); err != nil {
@@ -160,6 +211,14 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product updated", "product": product})
 }
 
+// DeleteProduct godoc
+// @Summary     Delete product
+// @Tags        Products
+// @Param       id   path  int  true  "Product ID"
+// @Success     200  "Product deleted"
+// @Failure     400  {object}  models.Error
+// @Failure     404  {object}  models.Error
+// @Router      /products/{id} [delete]
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
