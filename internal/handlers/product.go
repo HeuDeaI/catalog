@@ -38,8 +38,7 @@ func (h *ProductHandler) RegisterRoutes(router *gin.Engine) {
 // @Param       skin_type_ids  formData  []int    false  "Skin type IDs"
 // @Param       image          formData  file     true   "Image file"
 // @Success     201            {object}  models.Product
-// @Failure     400            {object}  map[string]string
-// @Failure     500            {object}  map[string]string
+// @Failure     400            {object}  models.Error
 // @Router      /products [post]
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var product models.Product
@@ -73,8 +72,8 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 // @Produce     json
 // @Param       id   path      int  true  "Product ID"
 // @Success     200  {object}  models.Product
-// @Failure     400            {object}  map[string]string
-// @Failure     500            {object}  map[string]string
+// @Failure     400  {object}  models.Error
+// @Failure     404  {object}  models.Error
 // @Router      /products/{id} [get]
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -113,7 +112,7 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 // @Param       max_price   query    number  false  "The maximum price of the product"
 // @Param       skin_type   query    string  false  "Skin type ID (comma-separated)"
 // @Success     200         {array}  models.Product
-// @Failure     400         {object} map[string]string
+// @Failure     400         {object} models.Error
 // @Router      /products [get]
 func (h *ProductHandler) GetProducts(c *gin.Context) {
 	if c.Query("min_price") != "" || c.Query("max_price") != "" || c.Query("skin_type") != "" {
@@ -185,8 +184,8 @@ func (h *ProductHandler) GetProductsByFilter(c *gin.Context) {
 // @Param       skin_type_ids  formData  []int    false  "Skin type IDs"
 // @Param       image          formData  file     false  "New image file"
 // @Success     200            {object}  models.Product
-// @Failure     400  {object}  map[string]string
-// @Failure     404  {object}  map[string]string
+// @Failure     400            {object}  models.Error
+// @Failure     404            {object}  models.Error
 // @Router      /products [put]
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	var product models.Product
@@ -216,9 +215,9 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 // @Summary     Delete product
 // @Tags        Products
 // @Param       id   path  int  true  "Product ID"
-// @Success     200  {object}  map[string]string
-// @Failure     400  {object}  map[string]string
-// @Failure     404  {object}  map[string]string
+// @Success     200  "Product deleted"
+// @Failure     400  {object}  models.Error
+// @Failure     404  {object}  models.Error
 // @Router      /products/{id} [delete]
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)

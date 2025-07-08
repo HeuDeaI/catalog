@@ -11,6 +11,12 @@ definitions:
           $ref: '#/definitions/models.Product'
         type: array
     type: object
+  models.Error:
+    properties:
+      error:
+        example: Error message
+        type: string
+    type: object
   models.Product:
     properties:
       brand:
@@ -79,9 +85,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
       summary: Return products
       tags:
       - Products
@@ -126,15 +130,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
       summary: Create a new product
       tags:
       - Products
@@ -181,15 +177,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
       summary: Update product
       tags:
       - Products
@@ -203,23 +195,15 @@ paths:
         type: integer
       responses:
         "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+          description: Product deleted
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
       summary: Delete product
       tags:
       - Products
@@ -240,15 +224,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Error'
       summary: Return product by ID
       tags:
       - Products
